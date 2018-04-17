@@ -10,8 +10,8 @@ window.gmail = gmail;
 
 //declare variables for trackingId, recipients, subject, and date
 const trackingId = 'UA-117509256-1';
-const recipients = [];
-const subject = '';
+var recipients = [];
+var subject = '';
 const date = moment().format('L');
 
 //verify extension is working correctly
@@ -26,13 +26,18 @@ gmail.observe.before('send_message', function(url, body, data, xhr){
 
   var body_params = xhr.xhrParams.body_params;
   console.log(body_params);
+
+  //capture recipients, subject
+  recipients.push(body_params.to[0]);
+  subject = body_params.subject;
+  console.log("subject", subject);
 });
 
 //function to add pixel once email is sent
 function addPixel(){
   let pixel = document.createElement('img');
   pixel.id = 'tracking-pixel';
-  pixel.src = `http://www.google-analytics.com/collect?v=1&tid=${trackingId}&cid=CLIENT_ID&t=event&ec=email&ea=open&el=${subject}_on_${date}_to_${recipients}&cs=newsletter&cm=email&cn=Campaign_Name`;
+  pixel.src = `https://www.google-analytics.com/collect?v=1&tid=${trackingId}&cid=CLIENT_ID&t=event&ec=email&ea=open&el=${subject}_on_${date}_to_${recipients}&cs=newsletter&cm=email&cn=Campaign_Name`;
 }
 
 // gmail.observe.on("compose", () => {
