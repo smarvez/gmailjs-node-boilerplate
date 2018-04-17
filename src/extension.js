@@ -28,10 +28,16 @@ gmail.observe.before('send_message', function(url, body, data, xhr){
   console.log(body_params);
 
   //capture recipients, subject
-  recipients.push(body_params.to[0]);
+  body_params.to.forEach(el => {
+    recipients.push(el);
+  })
   subject = body_params.subject;
-  console.log("subject", subject);
 });
+
+//clear email data after send
+gmail.observe.after('send_message', function() {
+  clear();
+})
 
 //function to add pixel once email is sent
 function addPixel(){
@@ -40,17 +46,11 @@ function addPixel(){
   pixel.src = `https://www.google-analytics.com/collect?v=1&tid=${trackingId}&cid=CLIENT_ID&t=event&ec=email&ea=open&el=${subject}_on_${date}_to_${recipients}&cs=newsletter&cm=email&cn=Campaign_Name`;
 }
 
-// gmail.observe.on("compose", () => {
-//   console.log(gmail.dom.compose())
-  // let id = gmail.get.email_id();
-  // console.log("this is the id", id);
-
-  // let email = new gmail.dom.email();
-  // let body = gmail.dom.email('body');
-  // // console.log(email);
-  // gmail.dom.email.body('<h1>My New Heading!</h1>' + body);
-  // console.log(gmail.dom.email);
-// })
+//clear email data
+function clear(){
+  recipients = [];
+  subject = '';
+}
 
 
 // gmail.observe.after("send_message", function(url, body, data, xhr) {
