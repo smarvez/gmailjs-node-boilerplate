@@ -20,18 +20,29 @@ gmail.observe.on("load", () => {
   console.log("Hello, " + userEmail + ". This is your extension talking!");
 });
 
-//add pixel to outgoing emails for tracking
+//add pixel to outgoing emails for tracking and add proxy links
 gmail.observe.before('send_message', function(url, body, data, xhr){
-  addPixel();
 
   var body_params = xhr.xhrParams.body_params;
   console.log(body_params);
+  var body = body_params.body
+  if(body.includes("https://")){
+    let message = body.split('href="https://').join('href="https://proxy.playposit.com/ssl/');
+    body = message;
+  }
+  if(body.includes("http://")){
+    let message = body.split('href="http://').join('href="https://proxy.playposit.com/http/');
+    body = message;
+  }
+  console.log("body", body);
 
   //capture recipients, subject
   body_params.to.forEach(el => {
     recipients.push(el);
   })
   subject = body_params.subject;
+
+  addPixel();
 });
 
 //clear email data after send
@@ -51,9 +62,3 @@ function clear(){
   recipients = [];
   subject = '';
 }
-
-
-// gmail.observe.after("send_message", function(url, body, data, xhr) {
-//   console.log("this is happening");
-//   console.log("url:", url, 'body', body, 'email_data', data, 'xhr', xhr);
-// })
