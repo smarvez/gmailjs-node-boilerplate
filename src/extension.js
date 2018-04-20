@@ -10,9 +10,9 @@ window.gmail = gmail;
 
 //declare variables for trackingId, recipients, subject, and date
 const trackingId = 'UA-117509256-1';
+const date = moment().format('L');
 var recipients = [];
 var subject = '';
-const date = moment().format('L');
 
 //verify extension is working correctly
 gmail.observe.on("load", () => {
@@ -24,8 +24,10 @@ gmail.observe.on("load", () => {
 gmail.observe.before('send_message', function(url, body, data, xhr){
 
   var body_params = xhr.xhrParams.body_params;
-  console.log(body_params);
+  console.log("body params", body_params);
   var body = body_params.body
+
+  //parse and edit links before send
   if(body.includes("https://")){
     let message = body.split('href="https://').join('href="https://proxy.playposit.com/ssl/');
     body = message;
@@ -34,14 +36,31 @@ gmail.observe.before('send_message', function(url, body, data, xhr){
     let message = body.split('href="http://').join('href="https://proxy.playposit.com/http/');
     body = message;
   }
-  console.log("body", body);
 
   //capture recipients, subject
   body_params.to.forEach(el => {
-    recipients.push(el);
+    if(el.length > 0) {
+      recipients.push(el);
+    }
   })
+  if (body_params.cc.length > 0){
+    body_params.cc.forEach(el => {
+      if(el.length > 0) {
+        recipients.push(el);
+      }
+    })
+  }
+  if (body_params.bcc.length > 0){
+    body_params.bcc.forEach(el => {
+      if(el.length > 0) {
+        recipients.push(el);
+      }
+    })
+  }
+  console.log("recipients", recipients);
   subject = body_params.subject;
 
+  //add pixel for tracking
   addPixel();
 });
 
